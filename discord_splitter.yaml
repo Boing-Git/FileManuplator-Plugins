@@ -1,0 +1,14 @@
+target: discord_split
+mime_types: ["*/*"]
+description: "Splits large files into 24MB parts for Discord uploads and creates auto-join scripts."
+
+actions:
+  - type: split_bytes
+    chunk_size: "24M"
+    output_pattern: "{output.dir}/{file.name}.part"
+
+  - type: shell
+    command: "echo 'cat \"{file.name}.part\"* > \"{file.name}\"' > '{output.dir}/join_linux_mac.sh' && chmod +x '{output.dir}/join_linux_mac.sh'"
+    
+  - type: shell
+    command: "echo 'copy /b \"{file.name}.part\"* \"{file.name}\"' > '{output.dir}/join_windows.bat'"

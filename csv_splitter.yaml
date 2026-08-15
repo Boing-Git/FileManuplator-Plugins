@@ -1,0 +1,18 @@
+target: csv_split
+mime_types: ["text/csv"]
+description: "Splits massive CSV files into 100k-row chunks while preserving the header row."
+
+actions:
+  - type: shell
+    command: |
+      # Extract header
+      head -n 1 '{file.path}' > '{output.dir}/.header.csv'
+      # Split remaining lines
+      tail -n +2 '{file.path}' | split -l 100000 -d - '{output.dir}/{file.stem}_part_'
+      # Re-attach header to all chunks
+      for f in '{output.dir}'/{file.stem}_part_*; do
+        cat '{output.dir}/.header.csv' "$f" > "${f}.csv"
+        rm "$f"
+      done
+      # Clean up
+      rm '{output.dir}/.header.csv'

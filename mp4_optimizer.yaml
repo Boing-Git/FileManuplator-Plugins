@@ -1,0 +1,7 @@
+target: mp4_optimize
+mime_types: ["video/*"]
+description: "Re-encodes and compresses videos to web-optimized H.264 MP4 format."
+
+actions:
+  - type: ffmpeg
+    args: "-i '{file.path}' -c:v libx264 -preset fast -crf 23 -c:a aac -b:a 128k -map 0:v:0 -map 0:a:0? '{output.dir}/{file.stem}.mp4'"

@@ -1,0 +1,13 @@
+target: fat32_split
+mime_types: ["*/*"]
+description: "Splits files over 3.9GB into sequential parts for FAT32 drive compatibility."
+
+actions:
+  - type: split_bytes
+    condition: "{file.size} > 3900000000"
+    chunk_size: "3900M"
+    output_pattern: "{output.dir}/{file.name}.part"
+    
+  - type: copy
+    condition: "{file.size} <= 3900000000"
+    destination: "{output.path}"

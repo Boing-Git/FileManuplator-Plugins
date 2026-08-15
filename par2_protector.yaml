@@ -1,0 +1,10 @@
+target: par2_protect
+mime_types: ["*/*"]
+description: "Creates SHA-256 checksums and PAR2 recovery volumes to protect against bitrot."
+
+actions:
+  - type: shell
+    command: "sha256sum '{file.path}' > '{output.dir}/{file.name}.sha256'"
+  
+  - type: shell
+    command: "par2create -r10 '{output.dir}/{file.name}.par2' '{file.path}'"
