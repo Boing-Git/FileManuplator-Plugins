@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+set -e
+if [[ ! -d "/run/media/boing/Games/pc backup/SideProjects/FM-Plugins" ]]; then
+  echo "Cannot find source directory; Did you move it?"
+  echo "(Looking for "/run/media/boing/Games/pc backup/SideProjects/FM-Plugins")"
+  echo 'Cannot force reload with this script - use "direnv reload" manually and then try again'
+  exit 1
+fi
+
+# rebuild the cache forcefully
+_nix_direnv_force_reload=1 direnv exec "/run/media/boing/Games/pc backup/SideProjects/FM-Plugins" true
+
+# Update the mtime for .envrc.
+# This will cause direnv to reload again - but without re-building.
+touch "/run/media/boing/Games/pc backup/SideProjects/FM-Plugins/.envrc"
+
+# Also update the timestamp of whatever profile_rc we have.
+# This makes sure that we know we are up to date.
+touch -r "/run/media/boing/Games/pc backup/SideProjects/FM-Plugins/.envrc" "/run/media/boing/Games/pc backup/SideProjects/FM-Plugins/.direnv"/*.rc
