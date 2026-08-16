@@ -3,5 +3,5 @@ mime_types: ["application/x-cd-image", "application/x-iso9660-image", "applicati
 description: "Losslessly compresses raw disc images (ISO, BIN/CUE) to CHD format for emulators."
 
 actions:
-  - type: shell
-    command: "chdman createcd -i '{file.path}' -o '{output.dir}/{file.stem}.chd'"
+  - type: chdman
+    args: "createcd -i '{file.path}' -o '{output.dir}/{file.stem}.chd'"

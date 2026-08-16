@@ -15,3 +15,7 @@
   description: "Joins .part files created by discord_split back into the original file."
   actions:
     - type: join_bytes
+    - type: delete
+      target_path: "{file.dir}/join_linux_mac.sh"
+    - type: delete
+      target_path: "{file.dir}/join_windows.bat"

@@ -3,17 +3,30 @@ mime_types: ["*/*"]
 description: "Automatically organizes files into categorized subfolders by MIME type."
 
 actions:
-  - type: shell
-    command: |
-      EXT="{file.ext}"
-      MIME="{file.mime}"
-      DIR="Others"
-      if [[ "$MIME" == image/* ]]; then DIR="Images"
-      elif [[ "$MIME" == video/* ]]; then DIR="Videos"
-      elif [[ "$MIME" == audio/* ]]; then DIR="Audio"
-      elif [[ "$MIME" == text/* || "$EXT" == ".pdf" || "$EXT" == ".docx" ]]; then DIR="Documents"
-      elif [[ "$EXT" == ".zip" || "$EXT" == ".tar.gz" || "$EXT" == ".rar" || "$EXT" == ".7z" ]]; then DIR="Archives"
-      elif [[ "$EXT" == ".exe" || "$EXT" == ".deb" || "$EXT" == ".rpm" || "$EXT" == ".AppImage" ]]; then DIR="Installers"
-      fi
-      mkdir -p "{output.dir}/$DIR"
-      cp '{file.path}' "{output.dir}/$DIR/{file.name}"
+  - type: copy
+    condition: "'{file.mime}'.startswith('image/')"
+    destination: "{output.dir}/Images/{file.name}"
+    
+  - type: copy
+    condition: "'{file.mime}'.startswith('video/')"
+    destination: "{output.dir}/Videos/{file.name}"
+    
+  - type: copy
+    condition: "'{file.mime}'.startswith('audio/')"
+    destination: "{output.dir}/Audio/{file.name}"
+
+  - type: copy
+    condition: "'{file.mime}'.startswith('text/') or '{file.ext}' in ['.pdf', '.docx']"
+    destination: "{output.dir}/Documents/{file.name}"
+
+  - type: copy
+    condition: "'{file.ext}' in ['.zip', '.tar.gz', '.rar', '.7z']"
+    destination: "{output.dir}/Archives/{file.name}"
+
+  - type: copy
+    condition: "'{file.ext}' in ['.exe', '.deb', '.rpm', '.AppImage']"
+    destination: "{output.dir}/Installers/{file.name}"
+
+  - type: copy
+    condition: "not ('{file.mime}'.startswith('image/') or '{file.mime}'.startswith('video/') or '{file.mime}'.startswith('audio/') or '{file.mime}'.startswith('text/') or '{file.ext}' in ['.pdf', '.docx', '.zip', '.tar.gz', '.rar', '.7z', '.exe', '.deb', '.rpm', '.AppImage'])"
+    destination: "{output.dir}/Others/{file.name}"

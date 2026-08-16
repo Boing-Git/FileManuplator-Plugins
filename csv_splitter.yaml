@@ -2,24 +2,13 @@
   mime_types: ["text/csv"]
   description: "Splits massive CSV files into 100k-row chunks while preserving the header row."
   actions:
-    - type: shell
-      command: |
-        head -n 1 '{file.path}' > '{output.dir}/.header.csv'
-        tail -n +2 '{file.path}' | split -l 100000 -d - '{output.dir}/{file.stem}_part_'
-        for f in '{output.dir}'/{file.stem}_part_*; do
-          cat '{output.dir}/.header.csv' "$f" > "${f}.csv"
-          rm "$f"
-        done
-        rm '{output.dir}/.header.csv'
+    - type: split_csv
+      chunk_size: "100000"
+      output_pattern: "{output.dir}/{file.stem}_part_"
 
 - target: csv_join
   mime_types: ["text/csv"]
   description: "Joins CSV chunk files back together into a single file while deduplicating headers."
   actions:
-    - type: shell
-      command: |
-        base_name=$(echo '{file.name}' | sed 's/_part_[0-9]*\.csv//')
-        head -n 1 "{output.dir}/${base_name}_part_00.csv" > '{output.path}'
-        for f in "{output.dir}/${base_name}_part_"*.csv; do
-          tail -n +2 "$f" >> '{output.path}'
-        done
+    - type: join_csv
+

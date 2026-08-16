@@ -3,28 +3,17 @@ mime_types: ["video/*"]
 description: "Sanitizes release & codec tags from video filenames for Plex/Jellyfin libraries."
 
 actions:
-  - type: shell
-    command: |
-      python3 -c "
-      import re, shutil, os
-      name = '{file.name}'
-      
-      # Replace dots with spaces
-      clean = name.replace('.', ' ')
-      
-      # Strip common release tags
-      regex = r'(?i)\b(1080p|720p|2160p|4k|x264|x265|h264|hevc|webrip|web-dl|bluray|aac|ac3|dts|remux)\b.*'
-      clean = re.sub(regex, '', clean)
-      
-      # Clean up trailing dashes/spaces
-      clean = re.sub(r'[\-\s]+$', '', clean).strip()
-      
-      # Re-attach correct extension
-      ext = '{file.ext}'
-      if not clean.lower().endswith(ext.lower()):
-          clean = clean + ext
-      
-      out_path = os.path.join('{output.dir}', clean)
-      shutil.copy2('{file.path}', out_path)
-      print(f'Cleaned filename: {clean}')
-      "
+  - type: regex_copy
+    rules:
+      # Replace dots with spaces (excluding the final extension dot by targeting stem parts)
+      - pattern: "\\."
+        replacement: " "
+      # Remove release tags and everything after
+      - pattern: "\\b(1080p|720p|2160p|4k|x264|x265|h264|hevc|webrip|web-dl|bluray|aac|ac3|dts|remux)\\b.*"
+        replacement: ""
+      # Clean trailing dashes and spaces
+      - pattern: "[\\-\\s]+$"
+        replacement: ""
+      # The previous steps stripped the extension, so add it back
+      - pattern: "$"
+        replacement: "{file.ext}"
