@@ -1,0 +1,86 @@
+[
+    {
+        "file_name": "par2_protector.toml",
+        "name": "Par2 Protect",
+        "description": "Creates SHA-256 checksums and PAR2 recovery volumes to protect against bitrot.",
+        "target": "par2_protect",
+        "mime_types": [
+            "*/*"
+        ]
+    },
+    {
+        "file_name": "smart_sorter.toml",
+        "name": "Smart Sort",
+        "description": "Automatically organizes files into categorized subfolders by MIME type.",
+        "target": "smart_sort",
+        "mime_types": [
+            "*/*"
+        ]
+    },
+    {
+        "file_name": "discord_splitter.toml",
+        "name": "Discord Split",
+        "description": "Splits large files into 24MB parts for Discord uploads and creates auto-join scripts.",
+        "target": "discord_split",
+        "mime_types": [
+            "*/*"
+        ]
+    },
+    {
+        "file_name": "media_renamer.toml",
+        "name": "Media Clean Names",
+        "description": "Sanitizes release & codec tags from video filenames for Plex/Jellyfin libraries.",
+        "target": "media_clean_names",
+        "mime_types": [
+            "video/*"
+        ]
+    },
+    {
+        "file_name": "csv_splitter.toml",
+        "name": "Csv Split",
+        "description": "Splits massive CSV files into 100k-row chunks while preserving the header row.",
+        "target": "csv_split",
+        "mime_types": [
+            "text/csv"
+        ]
+    },
+    {
+        "file_name": "webp_privacy_optimizer.toml",
+        "name": "Webp Strip Exif",
+        "description": "Converts images to WebP and strips sensitive EXIF metadata (GPS, camera info).",
+        "target": "webp_strip_exif",
+        "mime_types": [
+            "image/*"
+        ]
+    },
+    {
+        "file_name": "mp4_optimizer.toml",
+        "name": "Mp4 Optimize",
+        "description": "Re-encodes and compresses videos to web-optimized H.264 MP4 format.",
+        "target": "mp4_optimize",
+        "mime_types": [
+            "video/*"
+        ]
+    },
+    {
+        "file_name": "fat32_splitter.toml",
+        "name": "Fat32 Split",
+        "description": "Splits files over 3.9GB into sequential parts for FAT32 drive compatibility.",
+        "target": "fat32_split",
+        "mime_types": [
+            "*/*"
+        ]
+    },
+    {
+        "file_name": "chd_compressor.toml",
+        "name": "Chd Compress",
+        "description": "Losslessly compresses raw disc images (ISO, BIN/CUE) to CHD format for emulators.",
+        "target": "chd_compress",
+        "mime_types": [
+            "application/x-cd-image",
+            "application/x-iso9660-image",
+            "application/octet-stream",
+            "*/*"
+        ]
+    }
+]
