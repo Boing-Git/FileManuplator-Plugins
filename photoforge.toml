@@ -66,4 +66,4 @@ action = "magick"
 # - Cover: -resize WxH^ -gravity center -extent WxH
 # - Stretch: -resize WxH!
 # Since we can't do conditional args in the TOML engine easily yet, we'll assume a generic resize and extent
-args = "{file.path} -gravity center -crop {preview_canvas.crop_data} -resize {width}x{height}^ -extent {width}x{height} -define jpeg:extent={target_size}kb {output.path}"
+value = "{file.path} -gravity center -crop {preview_canvas.crop_data} -resize {width}x{height}^ -extent {width}x{height} -define jpeg:extent={target_size}kb {output.path}"
