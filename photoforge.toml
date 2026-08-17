@@ -1,0 +1,69 @@
+target = "photoforge"
+mime_types = ["image/*"]
+
+[plugin]
+name = "PhotoForge"
+version = "1.0"
+description = "Native port of PhotoForge. Resize, crop, and compress photos to exact dimensions and file size."
+
+[tab]
+title = "PhotoForge"
+icon = "image-x-generic-symbolic"
+closable = true
+
+[[ui]]
+type = "file_picker"
+id = "input_file"
+label = "Select Input Image"
+
+[[ui]]
+type = "image_canvas"
+id = "preview_canvas"
+image_source = "{file.path}"
+lock_aspect_ratio = "free"
+show_grid = true
+shade_outside = 0.5
+
+[[ui]]
+type = "text_input"
+id = "width"
+label = "Target Width (px)"
+default = "420"
+
+[[ui]]
+type = "text_input"
+id = "height"
+label = "Target Height (px)"
+default = "525"
+
+[[ui]]
+type = "picker"
+id = "fit_mode"
+label = "Fit Mode"
+options = ["Contain", "Cover", "Stretch"]
+default = "Cover"
+
+[[ui]]
+type = "slider"
+id = "target_size"
+label = "Target File Size (KB)"
+min = 10.0
+max = 1000.0
+default = 200.0
+
+[[ui]]
+type = "button"
+id = "apply_btn"
+label = "Convert & Compress"
+on_click = "execute_pipeline"
+
+[pipeline]
+[[pipeline.process]]
+step = 1
+action = "magick"
+# Note: For fit modes:
+# - Contain: -resize WxH
+# - Cover: -resize WxH^ -gravity center -extent WxH
+# - Stretch: -resize WxH!
+# Since we can't do conditional args in the TOML engine easily yet, we'll assume a generic resize and extent
+args = "{file.path} -gravity center -crop {preview_canvas.crop_data} -resize {width}x{height}^ -extent {width}x{height} -define jpeg:extent={target_size}kb {output.path}"
