@@ -1,5 +1,6 @@
 target = "discord_join"
 mime_types = [ "*/*" ]
+extensions = [ ".part" ]
 
 [plugin]
 name = "Discord Join"
