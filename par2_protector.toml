@@ -1,0 +1,20 @@
+target = "par2_protect"
+mime_types = [ "*/*",]
+
+[plugin]
+name = "Par2 Protect"
+version = "1.0"
+description = "Creates SHA-256 checksums and PAR2 recovery volumes to protect against bitrot."
+
+[pipeline]
+[[pipeline.process]]
+step = 1
+action = "checksum"
+algorithm = "sha256"
+destination = "{output.dir}/{file.name}.sha256"
+
+[[pipeline.process]]
+step = 2
+action = "par2"
+args = "create -r10 '{output.dir}/{file.name}.par2' '{file.path}'"
+

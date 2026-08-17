@@ -1,0 +1,19 @@
+target = "csv_split"
+mime_types = [ "text/csv",]
+
+[plugin]
+name = "Csv Split"
+version = "1.0"
+description = "Splits massive CSV files into 100k-row chunks while preserving the header row."
+
+[pipeline]
+[[pipeline.process]]
+step = 1
+action = "split_csv"
+chunk_size = "100000"
+output_pattern = "{output.dir}/{file.stem}_part_"
+
+[[pipeline.process]]
+step = 2
+action = "join_csv"
+

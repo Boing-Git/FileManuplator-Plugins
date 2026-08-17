@@ -1,0 +1,26 @@
+target = "fat32_split"
+mime_types = [ "*/*",]
+
+[plugin]
+name = "Fat32 Split"
+version = "1.0"
+description = "Splits files over 3.9GB into sequential parts for FAT32 drive compatibility."
+
+[pipeline]
+[[pipeline.process]]
+step = 1
+action = "split_bytes"
+condition = "{file.size} > 3900000000"
+chunk_size = "3900M"
+output_pattern = "{output.dir}/{file.name}.part"
+
+[[pipeline.process]]
+step = 2
+action = "copy"
+condition = "{file.size} <= 3900000000"
+destination = "{output.path}"
+
+[[pipeline.process]]
+step = 3
+action = "join_bytes"
+

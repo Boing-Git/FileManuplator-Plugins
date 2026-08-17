@@ -1,0 +1,51 @@
+target = "smart_sort"
+mime_types = [ "*/*",]
+
+[plugin]
+name = "Smart Sort"
+version = "1.0"
+description = "Automatically organizes files into categorized subfolders by MIME type."
+
+[pipeline]
+[[pipeline.process]]
+step = 1
+action = "copy"
+condition = "'{file.mime}'.startswith('image/')"
+destination = "{output.dir}/Images/{file.name}"
+
+[[pipeline.process]]
+step = 2
+action = "copy"
+condition = "'{file.mime}'.startswith('video/')"
+destination = "{output.dir}/Videos/{file.name}"
+
+[[pipeline.process]]
+step = 3
+action = "copy"
+condition = "'{file.mime}'.startswith('audio/')"
+destination = "{output.dir}/Audio/{file.name}"
+
+[[pipeline.process]]
+step = 4
+action = "copy"
+condition = "'{file.mime}'.startswith('text/') or '{file.ext}' in ['.pdf', '.docx']"
+destination = "{output.dir}/Documents/{file.name}"
+
+[[pipeline.process]]
+step = 5
+action = "copy"
+condition = "'{file.ext}' in ['.zip', '.tar.gz', '.rar', '.7z']"
+destination = "{output.dir}/Archives/{file.name}"
+
+[[pipeline.process]]
+step = 6
+action = "copy"
+condition = "'{file.ext}' in ['.exe', '.deb', '.rpm', '.AppImage']"
+destination = "{output.dir}/Installers/{file.name}"
+
+[[pipeline.process]]
+step = 7
+action = "copy"
+condition = "not ('{file.mime}'.startswith('image/') or '{file.mime}'.startswith('video/') or '{file.mime}'.startswith('audio/') or '{file.mime}'.startswith('text/') or '{file.ext}' in ['.pdf', '.docx', '.zip', '.tar.gz', '.rar', '.7z', '.exe', '.deb', '.rpm', '.AppImage'])"
+destination = "{output.dir}/Others/{file.name}"
+

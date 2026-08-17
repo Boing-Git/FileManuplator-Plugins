@@ -1,0 +1,29 @@
+target = "media_clean_names"
+mime_types = [ "video/*",]
+
+[plugin]
+name = "Media Clean Names"
+version = "1.0"
+description = "Sanitizes release & codec tags from video filenames for Plex/Jellyfin libraries."
+
+[pipeline]
+[[pipeline.process]]
+step = 1
+action = "regex_copy"
+[[pipeline.process.rules]]
+pattern = "\\."
+replacement = " "
+
+[[pipeline.process.rules]]
+pattern = "\\b(1080p|720p|2160p|4k|x264|x265|h264|hevc|webrip|web-dl|bluray|aac|ac3|dts|remux)\\b.*"
+replacement = ""
+
+[[pipeline.process.rules]]
+pattern = "[\\-\\s]+$"
+replacement = ""
+
+[[pipeline.process.rules]]
+pattern = "$"
+replacement = "{file.ext}"
+
+

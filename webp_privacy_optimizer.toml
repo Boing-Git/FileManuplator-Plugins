@@ -1,0 +1,14 @@
+target = "webp_strip_exif"
+mime_types = [ "image/*",]
+
+[plugin]
+name = "Webp Strip Exif"
+version = "1.0"
+description = "Converts images to WebP and strips sensitive EXIF metadata (GPS, camera info)."
+
+[pipeline]
+[[pipeline.process]]
+step = 1
+action = "magick"
+args = "'{file.path}' -strip -quality 85 '{output.dir}/{file.stem}.webp'"
+
