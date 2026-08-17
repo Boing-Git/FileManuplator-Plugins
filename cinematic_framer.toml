@@ -1,0 +1,54 @@
+target = "cinematic_framer"
+mime_types = ["image/*"]
+
+[plugin]
+name = "Cinematic Framer"
+version = "1.0"
+description = "Apply cinematic aspect ratios and letterboxing to images."
+
+[tab]
+title = "Cinematic Framer"
+icon = "crop-tool-symbolic"
+closable = true
+
+[[ui]]
+type = "image_canvas"
+id = "preview_canvas"
+image_source = "{file.path}"
+lock_aspect_ratio = "{aspect_ratio}"
+show_grid = true
+shade_outside = 0.5
+guides = "rule_of_thirds"
+
+[[ui]]
+type = "picker"
+id = "aspect_ratio"
+label = "Aspect Ratio"
+options = ["2.35:1 (Cinemascope)", "16:9 (Widescreen)", "4:3 (Classic)", "1:1 (Square)"]
+default = "2.35:1 (Cinemascope)"
+
+[[ui]]
+type = "slider"
+id = "border_width"
+label = "Letterbox / Border Width (%)"
+min = 0.0
+max = 25.0
+default = 5.0
+
+[[ui]]
+type = "text_input"
+id = "border_color"
+label = "Border Color (Hex)"
+default = "#000000"
+
+[[ui]]
+type = "button"
+id = "apply_btn"
+label = "Apply Framing"
+on_click = "execute_pipeline"
+
+[pipeline]
+[[pipeline.process]]
+step = 1
+action = "magick"
+args = "{file.path} -gravity center -crop {preview_canvas.crop_data} -background {border_color} -extent {preview_canvas.width}x{preview_canvas.height} {output.path}"
