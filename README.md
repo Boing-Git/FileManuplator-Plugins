@@ -24,45 +24,56 @@ chunk_size = "24M"
 output_pattern = "{output.dir}/{file.name}.part"
 ```
 
-## Syntax Guide: Every Character Explained
+## Syntax Guide: Every Character Explained (For Absolute Beginners)
 
-To write or modify these plugins for your projects, you must use these specific characters exactly as shown, because Rust's TOML parser is extremely strict. Here is a character-by-character breakdown:
+Never written code before? No problem! FileManipulator plugins are essentially just text files that give instructions. However, because computers are very literal, you must use specific punctuation marks (syntax) so the app understands what you mean. 
 
-### 1. `[ ]` vs `[[ ]]` (Brackets)
+If you are creating or modifying a plugin for your project, you **must** use these characters exactly as described. If you miss a single quote or bracket, the plugin will fail to load!
+
+### 1. `[ ]` (Single Brackets) vs `[[ ]]` (Double Brackets)
 * **Example:** `[plugin]` vs `[[pipeline.process]]`
-* **What it does:** Single brackets `[ ]` create a static category (a "Table"). Double brackets `[[ ]]` create an **Array of Tables**. 
-* **When to use it:** Use single brackets for one-off definitions like `[plugin]`. Because a conversion pipeline consists of a sequential list of steps (Step 1, Step 2), you **must** use double brackets for `[[pipeline.process]]`. Every time you write `[[pipeline.process]]`, you tell the engine: *"Here is the next step in my pipeline."*
-* **Should you use it in your project?** Yes. If you use single brackets for a pipeline step, the parser will crash.
+* **What it means:** Brackets are used to create "Categories" or "Headers". 
+* **When to use it:** 
+  * Use **Single Brackets `[ ]`** when you are defining something that only happens *once* in the file. For example, `[plugin]` holds the name and description of your plugin. There is only one name, so it gets single brackets.
+  * Use **Double Brackets `[[ ]]`** when you are creating a *list of steps*. A conversion pipeline has Step 1, Step 2, Step 3, etc. Every time you start a new step, you **must** write `[[pipeline.process]]`. This tells the engine: *"Here begins the next step in my pipeline list."*
+* **Should you use it?** Yes, it is mandatory.
 
-### 2. `.` (The Dot)
-* **Example:** `pipeline.process`
-* **What it does:** Defines hierarchy. 
-* **When to use it:** Use it to tell the parser that the `process` array specifically belongs inside the parent `pipeline` namespace.
-* **Should you use it in your project?** Yes. You must use it exactly like this so the Rust `Plugin` struct knows where to find your actions.
+### 2. `.` (The Dot / Period)
+* **Example:** `pipeline.process` or `{file.name}`
+* **What it means:** The dot means "belongs to" or "inside of".
+* **When to use it:** When writing `[[pipeline.process]]`, the dot tells the app that the `process` steps belong *inside* the main `pipeline`. When writing `{file.name}`, it tells the app you want the `name` that belongs to the `file`.
+* **Should you use it?** Yes, you must write it exactly as shown. `pipeline process` (with a space) will crash the app.
 
 ### 3. `=` (The Equals Sign)
-* **Example:** `action = "split_bytes"`
-* **What it does:** It is the assignment operator. 
-* **When to use it:** The word on the left is the key the engine looks for, and the word on the right is the value you give it. 
-* **Should you use it in your project?** Yes, it is mandatory to assign properties.
+* **Example:** `action = "copy"`
+* **What it means:** It assigns a value to a setting. Think of it like filling out a form where the left side is the question, and the right side is your answer.
+* **When to use it:** Whenever you need to define a setting. The word on the left (e.g., `action`) is the setting the engine is looking for, and the word on the right (e.g., `"copy"`) is your choice.
+* **Should you use it?** Yes, always use a single `=` to give a setting its value.
 
 ### 4. `" "` (Double Quotes)
 * **Example:** `"magick"` or `"3900M"`
-* **What it does:** It defines a String (text). TOML requires all text to be wrapped in double quotes. 
-* **When to use it:** Wrap any text, paths, or arguments in double quotes. Numbers (like `step = 1`) do not need quotes, but if a number contains letters (like `"3900M"`), it instantly becomes text and must have double quotes.
-* **Should you use it in your project?** Yes. If you forget them around text, the TOML parser will instantly fail.
+* **What it means:** Double quotes tell the computer: *"This is a piece of text, read it exactly as written."* (In coding, this is called a String).
+* **When to use it:** You must wrap almost everything on the right side of the `=` in double quotes. 
+  * **Exceptions:** Pure numbers (like `step = 1`) do NOT need quotes. But if a number has letters in it (like `"3900M"` for 3900 Megabytes), it counts as text and **must** have double quotes.
+* **Should you use it?** Yes! If you forget the double quotes around text, the app will instantly crash.
 
-### 5. `{ }` (Curly Braces)
+### 5. `[ , ]` (Square Brackets with Commas)
+* **Example:** `mime_types = ["image/png", "image/jpeg"]`
+* **What it means:** This creates a list of multiple items on a single line. The comma `,` separates the items.
+* **When to use it:** When a setting can have more than one answer. For example, your plugin might accept both PNG and JPEG images.
+* **Should you use it?** Yes, whenever providing a list of accepted file types.
+
+### 6. `{ }` (Curly Braces)
 * **Example:** `{file.path}`
-* **What it does:** FileManipulator's custom variable injection syntax. 
-* **When to use it:** When you construct file paths, directories, or commands. The Rust engine dynamically replaces `{file.path}` with the actual path of the file the user dropped into the GUI.
-* **Should you use it in your project?** Yes. You must use these when constructing terminal commands, or else the plugin won't know which file to process.
+* **What it means:** This is a "Fill in the blank" variable.
+* **When to use it:** You don't know the name of the file the user will drag into the app. By writing `{file.path}`, you are telling FileManipulator: *"Right before you run this step, delete `{file.path}` and replace it with the actual location of the dropped file."*
+* **Should you use it?** Yes, absolutely. Without curly braces, the app will literally look for a file named "file.path" on your hard drive and fail.
 
-### 6. `' '` (Single Quotes inside Double Quotes)
+### 7. `' '` (Single Quotes inside Double Quotes)
 * **Example:** `args = "'{file.path}' -resize 50%"`
-* **What it does:** Terminal shell safety. 
-* **When to use it:** If a user drops a file named `my cool video.mp4` (which has spaces), the terminal will see three separate files unless it is wrapped in quotes. Because you are already using double quotes `"` to define the TOML string, you place single quotes `'` inside them.
-* **Should you use it in your project?** Yes, always wrap `{file.path}` or `{output.path}` in single quotes when passing them to command-line actions like `ffmpeg` or `magick` to prevent the app from breaking on files with spaces.
+* **What it means:** This protects file paths that have spaces in them.
+* **When to use it:** If a user drags a file named `my summer vacation.mp4` into the app, the computer's terminal will see three different files (`my`, `summer`, and `vacation.mp4`) because spaces separate commands. Wrapping the path in single quotes `'my summer vacation.mp4'` tells the terminal it is all one single file.
+* **Should you use it?** Yes! Because you are already using double quotes `"` around your `args` text, you **must** use single quotes `'` around `{file.path}` or `{output.path}` so the app doesn't break when a file has spaces in its name.
 
 ## Available Variables
 You can inject the following variables directly into your strings (like conditions, destinations, or commands) by wrapping them in `{}` brackets:
