@@ -17,10 +17,31 @@ id = "input_file"
 label = "Select Input Image"
 
 [[ui]]
+type = "picker"
+id = "preset_size"
+label = "Preset Size"
+options = [
+    "Original Size",
+    "Large Image {3000x2000}",
+    "Medium Image {1500x1000}",
+    "Small Image {800x600}",
+    "Avatar {400x400}"
+]
+default = "Original Size"
+
+[[ui]]
+type = "radio_group"
+id = "crop_mode"
+label = "Crop Options"
+options = ["Freeform", "Locked to Aspect Ratio", "Reset Cropping"]
+default = "Freeform"
+
+[[ui]]
 type = "image_canvas"
 id = "preview_canvas"
 image_source = "{file.path}"
-lock_aspect_ratio = "free"
+lock_aspect_ratio = "{crop_mode}"
+aspect_ratio_source = "{preset_size}"
 show_grid = true
 shade_outside = 0.5
 
