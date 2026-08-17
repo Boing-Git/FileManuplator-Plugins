@@ -12,31 +12,3 @@ step = 1
 action = "split_bytes"
 chunk_size = "24M"
 output_pattern = "{output.dir}/{file.name}.part"
-
-[[pipeline.process]]
-step = 2
-action = "write_text"
-target_path = "{output.dir}/join_linux_mac.sh"
-text = "cat \"{file.name}.part\"* > \"{file.name}\"\n"
-executable = true
-
-[[pipeline.process]]
-step = 3
-action = "write_text"
-target_path = "{output.dir}/join_windows.bat"
-text = "copy /b \"{file.name}.part\"* \"{file.name}\"\n"
-
-[[pipeline.process]]
-step = 4
-action = "join_bytes"
-
-[[pipeline.process]]
-step = 5
-action = "delete"
-target_path = "{file.dir}/join_linux_mac.sh"
-
-[[pipeline.process]]
-step = 6
-action = "delete"
-target_path = "{file.dir}/join_windows.bat"
-

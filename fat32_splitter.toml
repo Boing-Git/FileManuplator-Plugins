@@ -20,7 +20,3 @@ action = "copy"
 condition = "{file.size} <= 3900000000"
 destination = "{output.path}"
 
-[[pipeline.process]]
-step = 3
-action = "join_bytes"
-

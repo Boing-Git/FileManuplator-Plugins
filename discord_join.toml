@@ -1,0 +1,12 @@
+target = "discord_join"
+mime_types = [ "*/*" ]
+
+[plugin]
+name = "Discord Join"
+version = "1.0"
+description = "Joins .part files (like those created by Discord Split) back into the original file."
+
+[pipeline]
+[[pipeline.process]]
+step = 1
+action = "join_bytes"
