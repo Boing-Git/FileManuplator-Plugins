@@ -71,9 +71,10 @@ If you are creating or modifying a plugin for your project, you **must** use the
 
 ### 7. `' '` (Single Quotes inside Double Quotes)
 * **Example:** `args = "'{file.path}' -resize 50%"`
-* **What it means:** This protects file paths that have spaces in them.
-* **When to use it:** If a user drags a file named `my summer vacation.mp4` into the app, the computer's terminal will see three different files (`my`, `summer`, and `vacation.mp4`) because spaces separate commands. Wrapping the path in single quotes `'my summer vacation.mp4'` tells the terminal it is all one single file.
-* **Should you use it?** Yes! Because you are already using double quotes `"` around your `args` text, you **must** use single quotes `'` around `{file.path}` or `{output.path}` so the app doesn't break when a file has spaces in its name.
+* **What it means:** Quotes group several words into one argument.
+* **Do you need them for file paths?** **No.** FileManipulator splits your `args` into arguments *before* filling in the variables, so `{file.path}` is always one single argument even when the file is called `my summer vacation.mp4`. Writing `-i {file.path}` and `-i '{file.path}'` do exactly the same thing.
+* **When they are still useful:** when *you* want to write several words as one argument, e.g. `-metadata "title=My Film"`.
+* **Safety note:** because arguments are never handed to a shell, characters like `;`, `|`, `$` and `&` in a file name or in something you type into a plugin's form are ordinary text. They cannot run commands.
 
 ## Available Variables
 You can inject the following variables directly into your strings (like conditions, destinations, or commands) by wrapping them in `{}` brackets:
@@ -88,12 +89,49 @@ You can inject the following variables directly into your strings (like conditio
 * `{output.path}`: The requested absolute output file path.
 * `{output.dir}` : The requested output directory path.
 
+## Tabs, widgets and colours
+
+A plugin can also have its own tab (`[tab]`) with widgets (`[[ui]]`): file pickers, sliders, an image cropping canvas, an `html_view` that runs a web page, a `notice` for warnings, and more. Any widget can take a colour role, e.g. `color = "error"` for something destructive; roles follow the colour scheme the user picked. All widgets and roles are described in the [filemanuplator README](https://github.com/Boing-Git/FileManuplator#3-declarative-ui-widgets-ui).
+
+`html_runner.toml` is the smallest example: a file picker and an `html_view`, with no pipeline at all.
+
+## Running on phones
+
+The mobile app has these plugins built in. A phone has no external programs, so a plugin whose pipeline uses `exec`, `ffmpeg`, `magick`, `pandoc`, `wkhtmltopdf`, `chdman` or `par2` is shown there as desktop-only. Every other action runs on the phone too. The phone saves one result per run: the file the pipeline wrote to `{output.path}`.
+
 ## Supported Actions
 
-Every action can optionally include a `condition` string. If the condition evaluates to `False`, the action is skipped. Conditions are evaluated using basic numeric logic (e.g., `"{file.size} > 40000"`).
+Every action can optionally include a `condition` string. If the condition is false, the action is skipped. A condition that cannot be parsed stops the pipeline with an error naming the step.
+
+### Conditions
+
+```toml
+condition = "{file.size} > 40000"
+condition = "'{file.mime}'.startswith('image/') or '{file.mime}'.startswith('video/')"
+condition = "'{file.ext}' in ['png', 'jpg'] and {file.size} >= 1024"
+condition = "not ('{file.ext}' == 'txt')"
+```
+
+* Comparisons: `==`, `!=`, `<`, `<=`, `>`, `>=`. If both sides are numbers they are compared as numbers, otherwise as text.
+* Text functions: `.startswith('x')`, `.endswith('x')`, `.contains('x')`.
+* Membership: `value in ['a', 'b']` and `value not in ['a', 'b']`.
+* Combine with `and`, `or`, `not` and parentheses. `and` binds tighter than `or`.
+* Text must be quoted (`'...'` or `"..."`). Variables such as `{file.size}` and widget ids like `{quality}` can be used inside quotes or on their own.
+* Note that `{file.ext}` has **no leading dot** (`pdf`, not `.pdf`), and for `archive.tar.gz` it is just `gz`.
+
+### `exec` — run any program (recommended)
+Runs a program with an explicit list of arguments. Nothing is passed through a shell.
+```toml
+[[pipeline.process]]
+step = 1
+action = "exec"
+program = "ffmpeg"
+argv = ["-y", "-i", "{file.path}", "-vcodec", "libx264", "{output.path}"]
+```
+Each entry of `argv` is exactly one argument, so spaces and punctuation inside a variable are always safe. If the program is not installed, the plugin stops with a message naming it instead of a bare exit code.
 
 ### Built-in Engines
-Run commands directly against built-in engines. Just provide the arguments (no need to specify the base command like `ffmpeg`):
+Shorthand for programs FileManipulator expects to be available. Provide the arguments only — the program name is implied:
 * `ffmpeg`
 * `magick`
 * `pandoc`
@@ -106,8 +144,28 @@ Run commands directly against built-in engines. Just provide the arguments (no n
 [[pipeline.process]]
 step = 1
 action = "magick"
-args = "'{file.path}' -resize 50% '{output.path}'"
+args = "{file.path} -resize 50% {output.path}"
 ```
+
+The `args` string is split into arguments on spaces (quotes group words together), and only then are `{variables}` filled in. That ordering is what keeps values inert — see the note on quotes above.
+
+### `export_image` — crop, fit and compress an image (built in)
+Does everything in one pass, so a JPEG is compressed only once. Every setting except the two files is optional, and it needs no external program, so it also runs on phones.
+```toml
+[[pipeline.process]]
+step = 1
+action = "export_image"
+target_file = "{file.path}"
+output_file = "{output.path}"
+crop_data = "{preview_canvas.crop_data}"   # WxH+X+Y, e.g. from an image_canvas
+width = "{width}"
+height = "{height}"
+fit = "{fit_mode}"                          # contain (default), cover or stretch
+max_kb = "{target_size}"
+```
+* `fit`: **contain** keeps the whole picture inside `width` × `height`, **cover** fills it exactly and trims the overflow, **stretch** fills it exactly and distorts.
+* `max_kb`: picks the highest JPEG quality whose file fits in that many KiB. It only applies when the output is a JPEG; lossless formats are saved as they are.
+* The output format comes from the output file's extension (or `format = "png"`).
 
 ### `copy`
 Copies the input file to a destination.
@@ -119,7 +177,7 @@ destination = "{output.path}"
 ```
 
 ### `split_bytes`
-Splits a massive file into smaller byte chunks. The `chunk_size` can be specified in bytes, or with suffixes (`4G`, `3900M`, `2K`).
+Splits a massive file into smaller byte chunks. The `chunk_size` can be given in bytes or with a suffix (`4G`, `3900M`, `2K`). Chunks are written as `<output_pattern>00`, `<output_pattern>01`, and so on.
 ```toml
 [[pipeline.process]]
 step = 1
@@ -129,7 +187,7 @@ output_pattern = "{output.dir}/{file.name}.part"
 ```
 
 ### `join_bytes`
-Automatically globs naturally-ordered split files (like `.part1`, `.part2`) and stitches them back together deterministically.
+Finds the sibling `.part*` files, sorts them in natural order (so `.part2` comes before `.part10`), and stitches them back together.
 ```toml
 [[pipeline.process]]
 step = 1
@@ -147,7 +205,47 @@ destination = "{output.dir}/{file.name}.sha256"
 ```
 
 ### `regex_copy`
-Copies a file while modifying its name via a series of Regex replacements. *(Note: Must be implemented according to the Rust engine's schema if supported)*
+Copies the file into `{output.dir}`, renaming it by applying a list of regex replacements to the file name in order. Replacements may use variables such as `{file.ext}`.
+```toml
+[[pipeline.process]]
+step = 1
+action = "regex_copy"
+
+[[pipeline.process.rules]]
+pattern = "\\."
+replacement = " "
+
+[[pipeline.process.rules]]
+pattern = "\\b(1080p|x264)\\b.*"
+replacement = ""
+```
+
+### `split_csv`
+Splits a CSV into chunks of `chunk_size` rows, repeating the header row in every chunk. Files are written as `<output_pattern>000.csv`, `<output_pattern>001.csv`, ...
+```toml
+[[pipeline.process]]
+step = 1
+action = "split_csv"
+chunk_size = "100000"
+output_pattern = "{output.dir}/{file.stem}_part_"
+```
+
+### `join_csv`
+Joins `<prefix>_part_000.csv`, `<prefix>_part_001.csv`, ... back into one CSV, keeping a single header. `<prefix>` is the input path up to `_part_`.
+```toml
+[[pipeline.process]]
+step = 1
+action = "join_csv"
+```
+
+### `echo`
+Prints `value` (variables allowed) to the application log. Handy while developing a plugin.
+```toml
+[[pipeline.process]]
+step = 1
+action = "echo"
+value = "Processing {file.name} ({file.size} bytes)"
+```
 
 ### `write_text`
 Writes text to a file, and can optionally make the file executable.

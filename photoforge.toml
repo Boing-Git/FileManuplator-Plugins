@@ -5,11 +5,11 @@ mime_types = ["image/*"]
 name = "PhotoForge"
 version = "1.0"
 description = "Native port of PhotoForge. Resize, crop, and compress photos to exact dimensions and file size."
+change_extension = false
 
 [tab]
 title = "PhotoForge"
 icon = "image-x-generic-symbolic"
-closable = true
 
 [[ui]]
 type = "file_picker"
@@ -28,6 +28,7 @@ options = [
     "Avatar {400x400}"
 ]
 default = "Original Size"
+overwrites = ["width", "height"]
 
 [[ui]]
 type = "radio_group"
@@ -44,6 +45,9 @@ lock_aspect_ratio = "{crop_mode}"
 aspect_ratio_source = "{preset_size}"
 show_grid = true
 shade_outside = 0.5
+show_handles = true
+draggable_selection = true
+lock_inside_image = true
 
 [[ui]]
 type = "text_input"
@@ -79,12 +83,16 @@ label = "Convert & Compress"
 on_click = "execute_pipeline"
 
 [pipeline]
+# Built in, so PhotoForge needs no ImageMagick and runs on phones too:
+# crop to the canvas selection, fit to the target size, then pick the highest
+# JPEG quality under the size budget (lossless formats ignore max_kb).
 [[pipeline.process]]
 step = 1
-action = "magick"
-# Note: For fit modes:
-# - Contain: -resize WxH
-# - Cover: -resize WxH^ -gravity center -extent WxH
-# - Stretch: -resize WxH!
-# Since we can't do conditional args in the TOML engine easily yet, we'll assume a generic resize and extent
-value = "'{file.path}' -gravity center -crop {preview_canvas.crop_data} -resize {width}x{height}^ -extent {width}x{height} -define jpeg:extent={target_size}kb '{output.path}'"
+action = "export_image"
+target_file = "{file.path}"
+output_file = "{output.path}"
+crop_data = "{preview_canvas.crop_data}"
+width = "{width}"
+height = "{height}"
+fit = "{fit_mode}"
+max_kb = "{target_size}"

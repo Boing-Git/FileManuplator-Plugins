@@ -1,0 +1,70 @@
+target = "video_trim"
+mime_types = ["video/*"]
+
+[plugin]
+name = "Video Trimmer"
+version = "1.0"
+description = "Trim a clip out of a video and re-encode it at a chosen quality."
+change_extension = false
+
+[tab]
+title = "Trimmer"
+icon = "video-x-generic-symbolic"
+
+[[ui]]
+type = "file_picker"
+id = "input_video"
+label = "Select Input Video"
+
+[[ui]]
+type = "text_input"
+id = "start_time"
+label = "Start (HH:MM:SS)"
+default = "00:00:00"
+
+[[ui]]
+type = "text_input"
+id = "duration"
+label = "Duration (seconds)"
+default = "10"
+
+[[ui]]
+type = "picker"
+id = "preset"
+label = "Encoder Preset"
+options = ["ultrafast", "medium", "veryslow"]
+default = "medium"
+
+[[ui]]
+type = "radio_group"
+id = "audio_mode"
+label = "Audio"
+options = ["Keep audio", "Mute"]
+default = "Keep audio"
+
+[[ui]]
+type = "slider"
+id = "crf"
+label = "Quality (CRF, lower = better)"
+min = 16.0
+max = 34.0
+default = 23.0
+
+[[ui]]
+type = "button"
+id = "run_btn"
+label = "Trim Video"
+on_click = "execute_pipeline"
+
+[pipeline]
+[[pipeline.process]]
+step = 1
+action = "ffmpeg"
+condition = "'{audio_mode}' == 'Keep audio'"
+args = "-y -ss {start_time} -i '{file.path}' -t {duration} -c:v libx264 -preset {preset} -crf {crf} -c:a copy '{output.path}'"
+
+[[pipeline.process]]
+step = 2
+action = "ffmpeg"
+condition = "'{audio_mode}' == 'Mute'"
+args = "-y -ss {start_time} -i '{file.path}' -t {duration} -c:v libx264 -preset {preset} -crf {crf} -an '{output.path}'"

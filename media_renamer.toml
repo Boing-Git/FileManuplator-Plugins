@@ -24,6 +24,6 @@ replacement = ""
 
 [[pipeline.process.rules]]
 pattern = "$"
-replacement = "{file.ext}"
+replacement = ".{file.ext}"
 
 

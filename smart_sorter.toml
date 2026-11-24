@@ -28,24 +28,24 @@ destination = "{output.dir}/Audio/{file.name}"
 [[pipeline.process]]
 step = 4
 action = "copy"
-condition = "'{file.mime}'.startswith('text/') or '{file.ext}' in ['.pdf', '.docx']"
+condition = "'{file.mime}'.startswith('text/') or '{file.ext}' in ['pdf', 'docx']"
 destination = "{output.dir}/Documents/{file.name}"
 
 [[pipeline.process]]
 step = 5
 action = "copy"
-condition = "'{file.ext}' in ['.zip', '.tar.gz', '.rar', '.7z']"
+condition = "'{file.ext}' in ['zip', 'gz', 'tgz', 'bz2', 'xz', 'rar', '7z']"
 destination = "{output.dir}/Archives/{file.name}"
 
 [[pipeline.process]]
 step = 6
 action = "copy"
-condition = "'{file.ext}' in ['.exe', '.deb', '.rpm', '.AppImage']"
+condition = "'{file.ext}' in ['exe', 'msi', 'deb', 'rpm', 'AppImage']"
 destination = "{output.dir}/Installers/{file.name}"
 
 [[pipeline.process]]
 step = 7
 action = "copy"
-condition = "not ('{file.mime}'.startswith('image/') or '{file.mime}'.startswith('video/') or '{file.mime}'.startswith('audio/') or '{file.mime}'.startswith('text/') or '{file.ext}' in ['.pdf', '.docx', '.zip', '.tar.gz', '.rar', '.7z', '.exe', '.deb', '.rpm', '.AppImage'])"
+condition = "not ('{file.mime}'.startswith('image/') or '{file.mime}'.startswith('video/') or '{file.mime}'.startswith('audio/') or '{file.mime}'.startswith('text/') or '{file.ext}' in ['pdf', 'docx', 'zip', 'gz', 'tgz', 'bz2', 'xz', 'rar', '7z', 'exe', 'msi', 'deb', 'rpm', 'AppImage'])"
 destination = "{output.dir}/Others/{file.name}"
 

@@ -1,0 +1,19 @@
+[plugin]
+name = "HTML Runner"
+version = "1.0"
+description = "Run an HTML page the way a phone shows it: live in a phone-sized frame on desktop (re-runs each time you save the file), full-screen in the mobile app."
+
+[tab]
+title = "HTML"
+icon = "web-browser-symbolic"
+
+[[ui]]
+type = "file_picker"
+id = "page"
+label = "HTML file"
+filter = ["*.html", "*.htm"]
+
+[[ui]]
+type = "html_view"
+id = "preview"
+source = "{file.path}"
