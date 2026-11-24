@@ -16,5 +16,7 @@ destination = "{output.dir}/{file.name}.sha256"
 [[pipeline.process]]
 step = 2
 action = "par2"
-args = "create -r10 '{output.dir}/{file.name}.par2' '{file.path}'"
+# -B: par2 only protects files under its base path, which is otherwise the
+# output folder.
+args = "create -r10 -B '{file.dir}' '{output.dir}/{file.name}.par2' '{file.path}'"
 

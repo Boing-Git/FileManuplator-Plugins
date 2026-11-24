@@ -18,5 +18,6 @@ output_pattern = "{output.dir}/{file.name}.part"
 step = 2
 action = "copy"
 condition = "{file.size} <= 3900000000"
-destination = "{output.path}"
+# Small enough already: copy it unchanged, under its own name.
+destination = "{output.dir}/{file.name}"
 

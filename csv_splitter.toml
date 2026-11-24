@@ -13,7 +13,3 @@ action = "split_csv"
 chunk_size = "100000"
 output_pattern = "{output.dir}/{file.stem}_part_"
 
-[[pipeline.process]]
-step = 2
-action = "join_csv"
-
